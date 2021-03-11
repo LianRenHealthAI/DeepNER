@@ -36,9 +36,9 @@ def crf_decode(decode_tokens, raw_text, id2ent):
 
     while index_ < len(decode_tokens):
 
-        token_label = id2ent[decode_tokens[index_]].split('-')
+        token_label = id2ent[decode_tokens[index_]].split("-")
 
-        if token_label[0].startswith('S'):
+        if token_label[0].startswith("S"):
             token_type = token_label[1]
             tmp_ent = raw_text[index_]
 
@@ -49,21 +49,27 @@ def crf_decode(decode_tokens, raw_text, id2ent):
 
             index_ += 1
 
-        elif token_label[0].startswith('B'):
+        elif token_label[0].startswith("B"):
             token_type = token_label[1]
             start_index = index_
 
             index_ += 1
             while index_ < len(decode_tokens):
-                temp_token_label = id2ent[decode_tokens[index_]].split('-')
+                temp_token_label = id2ent[decode_tokens[index_]].split("-")
 
-                if temp_token_label[0].startswith('I') and token_type == temp_token_label[1]:
+                if (
+                    temp_token_label[0].startswith("I")
+                    and token_type == temp_token_label[1]
+                ):
                     index_ += 1
-                elif temp_token_label[0].startswith('E') and token_type == temp_token_label[1]:
+                elif (
+                    temp_token_label[0].startswith("E")
+                    and token_type == temp_token_label[1]
+                ):
                     end_index = index_
                     index_ += 1
 
-                    tmp_ent = raw_text[start_index: end_index + 1]
+                    tmp_ent = raw_text[start_index : end_index + 1]
 
                     if token_type not in predict_entities:
                         predict_entities[token_type] = [(tmp_ent, start_index)]
@@ -91,11 +97,12 @@ def span_decode(start_logits, end_logits, raw_text, id2ent):
             continue
         for j, e_type in enumerate(end_pred[i:]):
             if s_type == e_type:
-                tmp_ent = raw_text[i:i + j + 1]
+                tmp_ent = raw_text[i : i + j + 1]
                 predict_entities[id2ent[s_type]].append((tmp_ent, i))
                 break
 
     return predict_entities
+
 
 # 严格解码 baseline
 def mrc_decode(start_logits, end_logits, raw_text):
@@ -108,7 +115,7 @@ def mrc_decode(start_logits, end_logits, raw_text):
             continue
         for j, e_type in enumerate(end_pred[i:]):
             if s_type == e_type:
-                tmp_ent = raw_text[i:i+j+1]
+                tmp_ent = raw_text[i : i + j + 1]
                 predict_entities.append((tmp_ent, i))
                 break
 
@@ -170,17 +177,23 @@ def crf_evaluation(model, dev_info, device, ent2id):
             if _type not in pred_entities:
                 pred_entities[_type] = []
 
-            tmp_metric[idx] += calculate_metric(gt_entities[_type], pred_entities[_type])
+            tmp_metric[idx] += calculate_metric(
+                gt_entities[_type], pred_entities[_type]
+            )
 
         role_metric += tmp_metric
 
     for idx, _type in enumerate(ENTITY_TYPES):
-        temp_metric = get_p_r_f(role_metric[idx][0], role_metric[idx][1], role_metric[idx][2])
+        temp_metric = get_p_r_f(
+            role_metric[idx][0], role_metric[idx][1], role_metric[idx][2]
+        )
 
         mirco_metrics += temp_metric * type_weight[_type]
 
-    metric_str = f'[MIRCO] precision: {mirco_metrics[0]:.4f}, ' \
-                 f'recall: {mirco_metrics[1]:.4f}, f1: {mirco_metrics[2]:.4f}'
+    metric_str = (
+        f"[MIRCO] precision: {mirco_metrics[0]:.4f}, "
+        f"recall: {mirco_metrics[1]:.4f}, f1: {mirco_metrics[2]:.4f}"
+    )
 
     return metric_str, mirco_metrics[2]
 
@@ -211,13 +224,14 @@ def span_evaluation(model, dev_info, device, ent2id):
 
     id2ent = {ent2id[key]: key for key in ent2id.keys()}
 
-    for tmp_start_logits, tmp_end_logits, tmp_callback \
-            in zip(start_logits, end_logits, dev_callback_info):
+    for tmp_start_logits, tmp_end_logits, tmp_callback in zip(
+        start_logits, end_logits, dev_callback_info
+    ):
 
         text, gt_entities = tmp_callback
 
-        tmp_start_logits = tmp_start_logits[1:1 + len(text)]
-        tmp_end_logits = tmp_end_logits[1:1 + len(text)]
+        tmp_start_logits = tmp_start_logits[1 : 1 + len(text)]
+        tmp_end_logits = tmp_end_logits[1 : 1 + len(text)]
 
         pred_entities = span_decode(tmp_start_logits, tmp_end_logits, text, id2ent)
 
@@ -225,17 +239,24 @@ def span_evaluation(model, dev_info, device, ent2id):
             if _type not in pred_entities:
                 pred_entities[_type] = []
 
-            role_metric[idx] += calculate_metric(gt_entities[_type], pred_entities[_type])
+            role_metric[idx] += calculate_metric(
+                gt_entities[_type], pred_entities[_type]
+            )
 
     for idx, _type in enumerate(ENTITY_TYPES):
-        temp_metric = get_p_r_f(role_metric[idx][0], role_metric[idx][1], role_metric[idx][2])
+        temp_metric = get_p_r_f(
+            role_metric[idx][0], role_metric[idx][1], role_metric[idx][2]
+        )
 
         mirco_metrics += temp_metric * type_weight[_type]
 
-    metric_str = f'[MIRCO] precision: {mirco_metrics[0]:.4f}, ' \
-                 f'recall: {mirco_metrics[1]:.4f}, f1: {mirco_metrics[2]:.4f}'
+    metric_str = (
+        f"[MIRCO] precision: {mirco_metrics[0]:.4f}, "
+        f"recall: {mirco_metrics[1]:.4f}, f1: {mirco_metrics[2]:.4f}"
+    )
 
     return metric_str, mirco_metrics[2]
+
 
 def mrc_evaluation(model, dev_info, device):
     dev_loader, (dev_callback_info, type_weight) = dev_info
@@ -263,24 +284,29 @@ def mrc_evaluation(model, dev_info, device):
 
     id2ent = {x: i for i, x in enumerate(ENTITY_TYPES)}
 
-    for tmp_start_logits, tmp_end_logits, tmp_callback \
-            in zip(start_logits, end_logits, dev_callback_info):
+    for tmp_start_logits, tmp_end_logits, tmp_callback in zip(
+        start_logits, end_logits, dev_callback_info
+    ):
 
         text, text_offset, ent_type, gt_entities = tmp_callback
 
-        tmp_start_logits = tmp_start_logits[text_offset:text_offset+len(text)]
-        tmp_end_logits = tmp_end_logits[text_offset:text_offset+len(text)]
+        tmp_start_logits = tmp_start_logits[text_offset : text_offset + len(text)]
+        tmp_end_logits = tmp_end_logits[text_offset : text_offset + len(text)]
 
         pred_entities = mrc_decode(tmp_start_logits, tmp_end_logits, text)
 
         role_metric[id2ent[ent_type]] += calculate_metric(gt_entities, pred_entities)
 
     for idx, _type in enumerate(ENTITY_TYPES):
-        temp_metric = get_p_r_f(role_metric[idx][0], role_metric[idx][1], role_metric[idx][2])
+        temp_metric = get_p_r_f(
+            role_metric[idx][0], role_metric[idx][1], role_metric[idx][2]
+        )
 
         mirco_metrics += temp_metric * type_weight[_type]
 
-    metric_str = f'[MIRCO] precision: {mirco_metrics[0]:.4f}, ' \
-                  f'recall: {mirco_metrics[1]:.4f}, f1: {mirco_metrics[2]:.4f}'
+    metric_str = (
+        f"[MIRCO] precision: {mirco_metrics[0]:.4f}, "
+        f"recall: {mirco_metrics[1]:.4f}, f1: {mirco_metrics[2]:.4f}"
+    )
 
     return metric_str, mirco_metrics[2]
