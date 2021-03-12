@@ -16,6 +16,11 @@ from src.preprocess.processor import cut_sent, fine_grade_tokenize
 MID_DATA_DIR = "./data/mid_data"
 RAW_DATA_DIR = "./data/raw_data_random"
 SUBMIT_DIR = "./result"
+
+MID_DATA_DIR = "./data/crf_data/mid_data"
+RAW_DATA_DIR = "./data/raw_data_random"
+SUBMIT_DIR = "./result"
+
 GPU_IDS = "0"
 
 LAMBDA = 0.3
@@ -30,6 +35,7 @@ VERSION = "mixed"  # choose single or ensemble or mixed ; if mixed  VOTE and TAS
 BERT_TYPE = "uer_large"  # roberta_wwm / ernie_1 / uer_large
 
 BERT_DIR = f"./bert/torch_{BERT_TYPE}"
+
 with open("./best_ckpt_path.txt", "r", encoding="utf-8") as f:
     CKPT_PATH = f.read().strip()
 

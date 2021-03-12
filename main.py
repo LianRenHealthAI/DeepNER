@@ -17,6 +17,9 @@ from src.utils.functions_utils import (
 )
 from src.preprocess.processor import NERProcessor, convert_examples_to_features
 
+from pysnooper import snoop
+
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
@@ -39,6 +42,9 @@ def train_base(opt, train_examples, dev_examples=None):
         opt.task_type, train_features, "train", use_type_embed=opt.use_type_embed
     )
 
+    print(f"len(ent2id): {len(ent2id)}")
+    print(f"ent2id: {ent2id}")
+    # exit(1)
     if opt.task_type == "crf":
         model = build_model(
             "crf", opt.bert_dir, num_tags=len(ent2id), dropout_prob=opt.dropout_prob
@@ -140,6 +146,7 @@ def train_base(opt, train_examples, dev_examples=None):
             logger.info("{}已删除".format(x))
 
 
+# @snoop()
 def training(opt):
     if args.task_type == "mrc":
         # 62 for mrc query
@@ -148,14 +155,16 @@ def training(opt):
         processor = NERProcessor(opt.max_seq_len)
 
     train_raw_examples = processor.read_json(
-        os.path.join(opt.raw_data_dir, "train.json")
+        os.path.join(opt.raw_data_dir, "stack.json")
     )
 
     # add pseudo data to train data
-    pseudo_raw_examples = processor.read_json(
-        os.path.join(opt.raw_data_dir, "pseudo.json")
-    )
-    train_raw_examples = train_raw_examples + pseudo_raw_examples
+    # pseudo_raw_examples = processor.read_json(
+    #     os.path.join(opt.raw_data_dir, "pseudo.json")
+    # )
+
+    # train_raw_examples = train_raw_examples + pseudo_raw_examples
+    train_raw_examples = train_raw_examples
 
     train_examples = processor.get_examples(train_raw_examples, "train")
 
@@ -184,9 +193,9 @@ def stacking(opt):
         os.path.join(opt.raw_data_dir, "stack.json")
     )
 
-    pseudo_raw_examples = processor.read_json(
-        os.path.join(opt.raw_data_dir, "pseudo.json")
-    )
+    # pseudo_raw_examples = processor.read_json(
+    #     os.path.join(opt.raw_data_dir, "pseudo.json")
+    # )
 
     base_output_dir = opt.output_dir
 
@@ -195,7 +204,8 @@ def stacking(opt):
         train_raw_examples = [stack_raw_examples[_idx] for _idx in train_ids]
 
         # add pseudo data to train data
-        train_raw_examples = train_raw_examples + pseudo_raw_examples
+        train_raw_examples = train_raw_examples
+        # train_raw_examples = train_raw_examples + pseudo_raw_examples
         train_examples = processor.get_examples(train_raw_examples, "train")
 
         dev_raw_examples = [stack_raw_examples[_idx] for _idx in dev_ids]
@@ -208,6 +218,7 @@ def stacking(opt):
         train_base(opt, train_examples, dev_info)
 
 
+# snoop()
 if __name__ == "__main__":
     start_time = time.time()
     logging.info("----------------开始计时----------------")

@@ -15,7 +15,7 @@ def convert_data_to_json(base_dir, save_data=False, save_dict=False):
     test_examples = []
 
     stack_dir = os.path.join(base_dir, "train")
-    pseudo_dir = os.path.join(base_dir, "pseudo")
+    # pseudo_dir = os.path.join(base_dir, "pseudo")
     test_dir = os.path.join(base_dir, "test")
 
     # process train examples
@@ -70,40 +70,40 @@ def convert_data_to_json(base_dir, save_data=False, save_dict=False):
     assert len(ent_types) == 13
 
     # process test examples predicted by the preliminary model
-    for i in trange(1000, 1500):
-        with open(os.path.join(pseudo_dir, f"{i}.txt"), encoding="utf-8") as f:
-            text = f.read()
+    # for i in trange(1000, 1500):
+    #     with open(os.path.join(pseudo_dir, f"{i}.txt"), encoding="utf-8") as f:
+    #         text = f.read()
 
-        candidate_entities = []
-        for _ent in entities:
-            if _ent in text:
-                candidate_entities.append(_ent)
+    #     candidate_entities = []
+    #     for _ent in entities:
+    #         if _ent in text:
+    #             candidate_entities.append(_ent)
 
-        labels = []
-        with open(os.path.join(pseudo_dir, f"{i}.ann"), encoding="utf-8") as f:
-            for line in f.readlines():
-                tmp_label = line.strip().split("\t")
-                assert len(tmp_label) == 3
-                tmp_mid = tmp_label[1].split()
-                tmp_label = [tmp_label[0]] + tmp_mid + [tmp_label[2]]
+    #     labels = []
+    #     with open(os.path.join(pseudo_dir, f"{i}.ann"), encoding="utf-8") as f:
+    #         for line in f.readlines():
+    #             tmp_label = line.strip().split("\t")
+    #             assert len(tmp_label) == 3
+    #             tmp_mid = tmp_label[1].split()
+    #             tmp_label = [tmp_label[0]] + tmp_mid + [tmp_label[2]]
 
-                labels.append(tmp_label)
-                tmp_label[2] = int(tmp_label[2])
-                tmp_label[3] = int(tmp_label[3])
+    #             labels.append(tmp_label)
+    #             tmp_label[2] = int(tmp_label[2])
+    #             tmp_label[3] = int(tmp_label[3])
 
-                assert (
-                    text[tmp_label[2] : tmp_label[3]] == tmp_label[-1]
-                ), "{},{}索引抽取错误".format(tmp_label, i)
+    #             assert (
+    #                 text[tmp_label[2] : tmp_label[3]] == tmp_label[-1]
+    #             ), "{},{}索引抽取错误".format(tmp_label, i)
 
-        pseudo_examples.append(
-            {
-                "id": i,
-                "text": text,
-                "labels": labels,
-                "candidate_entities": candidate_entities,
-                "pseudo": 1,
-            }
-        )
+    #     pseudo_examples.append(
+    #         {
+    #             "id": i,
+    #             "text": text,
+    #             "labels": labels,
+    #             "candidate_entities": candidate_entities,
+    #             "pseudo": 1,
+    #         }
+    #     )
 
     # process test examples
     for i in trange(1000, 1500):
@@ -185,4 +185,4 @@ def build_ent2query(data_dir):
 
 if __name__ == "__main__":
     convert_data_to_json("../../data/raw_data", save_data=True, save_dict=True)
-    build_ent2query("../../data/mid_data")
+    # build_ent2query("../../data/mid_data")

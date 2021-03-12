@@ -2,27 +2,43 @@ import os
 import re
 import json
 import logging
-from transformers import BertTokenizer
+from transformers import BertTokenizer, AutoTokenizer
 from collections import defaultdict
 import random
 
 logger = logging.getLogger(__name__)
 
-ENTITY_TYPES = [
-    "DRUG",
-    "DRUG_INGREDIENT",
-    "DISEASE",
-    "SYMPTOM",
-    "SYNDROME",
-    "DISEASE_GROUP",
-    "FOOD",
-    "FOOD_GROUP",
-    "PERSON_GROUP",
-    "DRUG_GROUP",
-    "DRUG_DOSAGE",
-    "DRUG_TASTE",
-    "DRUG_EFFICACY",
-]
+# ENTITY_TYPES = [
+#     "DRUG",
+#     "DRUG_INGREDIENT",
+#     "DISEASE",
+#     "SYMPTOM",
+#     "SYNDROME",
+#     "DISEASE_GROUP",
+#     "FOOD",
+#     "FOOD_GROUP",
+#     "PERSON_GROUP",
+#     "DRUG_GROUP",
+#     "DRUG_DOSAGE",
+#     "DRUG_TASTE",
+#     "DRUG_EFFICACY",
+# ]
+
+#%%
+with open(
+    "/home/xiaojin/Code/DeepNER/data/crf_data/mid_data/crf_ent2id.json",
+    encoding="utf-8",
+) as f:
+    ent2id = json.load(f)
+
+ENTITY_TYPES = []
+for entity_type in ent2id.keys():
+    if "-" in entity_type:
+        label = entity_type.split("-")
+        if label[1] not in ENTITY_TYPES:
+            ENTITY_TYPES.append(label[1])
+print("ENTITY_TYPES", ENTITY_TYPES)
+#%%
 
 
 class InputExample:
@@ -32,6 +48,9 @@ class InputExample:
         self.labels = labels
         self.pseudo = pseudo
         self.distant_labels = distant_labels
+
+    def __repr__(self) -> str:
+        return f"text: {self.text}, labels:{self.labels}"
 
 
 class BaseFeature:
@@ -138,8 +157,10 @@ class NERProcessor:
         for _label in labels:
             if start_index <= _label[2] <= _label[3] <= end_index:
                 new_offset = _label[2] - start_index
-
-                assert sent[new_offset : new_offset + len(_label[-1])] == _label[-1]
+                try:
+                    assert sent[new_offset : new_offset + len(_label[-1])] == _label[-1]
+                except:
+                    print("=============", _label)
 
                 new_labels.append((_label[1], _label[-1], new_offset))
             # label 被截断的情况
@@ -307,9 +328,21 @@ def convert_crf_example(
     pseudo = example.pseudo
 
     callback_info = (raw_text,)
-    callback_labels = {x: [] for x in ENTITY_TYPES}
 
+    callback_labels = {x: [] for x in ENTITY_TYPES}
+    # print(ent2id)
+    # print(callback_labels)
+    # exit(0)
     for _label in entities:
+        try:
+            callback_labels[_label[0]].append((_label[1], _label[2]))
+            # print("error here:", _label)
+            # print(example)
+            # exit(0)
+        except:
+            print("error here:", _label)
+            print(example)
+            # exit(1)
         callback_labels[_label[0]].append((_label[1], _label[2]))
 
     callback_info += (callback_labels,)
@@ -628,7 +661,8 @@ def convert_mrc_example(
 def convert_examples_to_features(task_type, examples, max_seq_len, bert_dir, ent2id):
     assert task_type in ["crf", "span", "mrc"]
 
-    tokenizer = BertTokenizer(os.path.join(bert_dir, "vocab.txt"))
+    # tokenizer = BertTokenizer(os.path.join(bert_dir, "vocab.txt"))
+    tokenizer = AutoTokenizer.from_pretrained(bert_dir)
 
     features = []
 
