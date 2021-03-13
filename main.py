@@ -17,8 +17,6 @@ from src.utils.functions_utils import (
 )
 from src.preprocess.processor import NERProcessor, convert_examples_to_features
 
-from pysnooper import snoop
-
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(

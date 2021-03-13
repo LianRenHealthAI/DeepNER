@@ -38,14 +38,14 @@ def fix_blank_index(raw_txt_dir, tag_dir):
                     label_info[1] = int(label_info[1]) + pre_blank_num
                     fix_results.append(label_info)
             with open(
-                os.path.join("results/results", file_name.replace("txt", "tag")), "w"
+                os.path.join("submit/results", file_name.replace("txt", "tag")), "w"
             ) as fr:
                 for i in fix_results:
                     fr.write("#".join([str(j) for j in i]))
 
 
 def zip_file(src_dir):
-    zip_name = src_dir + ".zip"
+    zip_name = "results.zip"
     z = zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED)
     for dirpath, dirnames, filenames in os.walk(src_dir):
         fpath = dirpath.replace(src_dir, "")
@@ -59,4 +59,4 @@ def zip_file(src_dir):
 if __name__ == "__main__":
     print("------")
     fix_blank_index("data/crf_data/test_data", "results/mixed")
-    zip_file("results/results")
+    zip_file("submit")

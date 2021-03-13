@@ -4,3 +4,5 @@ results/
 pretrained/
 .vscode/
 out/
+results.zip
+best_ckpt_path.txt

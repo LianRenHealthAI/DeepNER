@@ -15,7 +15,7 @@ MID_DATA_DIR = "/home/xiaojin/Code/DeepNER/data/crf_data/mid_data"
 TEST_DATA = "/home/xiaojin/Code/DeepNER/data/crf_data/test_data/test.json"
 
 BERT_DIR = "pretrained/chinese-roberta-wwm-ext"
-# BERT_DIR = "pretrained/bert-base-chinese"
+BERT_DIR = "pretrained/bert-base-chinese"
 
 TASK_TYPE = "crf"
 GPU_IDS = "0"
