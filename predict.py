@@ -22,8 +22,8 @@ MID_DATA_DIR = "/home/xiaojin/Code/DeepNER/data/crf_data/mid_data"
 TEST_DATA = "/home/xiaojin/Code/DeepNER/data/crf_data/test_data/test.json"
 
 # BERT_DIR = "pretrained/chinese-roberta-wwm-ext"
-# BERT_DIR = "pretrained/bert-base-chinese"
-BERT_DIR = "pretrained/torch_uer_large"
+BERT_DIR = "pretrained/bert-base-chinese"
+# BERT_DIR = "pretrained/torch_uer_large"
 
 TASK_TYPE = "crf"
 GPU_IDS = "0"
@@ -34,6 +34,8 @@ LAMBDA = 0.3
 THRESHOLD = 0.9
 
 BERT_DIR_LIST = ["pretrained/bert-base-chinese"]
+
+
 with open("./best_ckpt_path.txt", "r", encoding="utf-8") as f:
     CKPT_PATH = f.readlines()[-1].strip()
 

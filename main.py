@@ -16,7 +16,7 @@ from src.utils.functions_utils import (
     get_time_dif,
 )
 from src.preprocess.processor import NERProcessor, convert_examples_to_features
-
+from config import Config
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -222,7 +222,8 @@ if __name__ == "__main__":
     logging.info("----------------开始计时----------------")
     logging.info("----------------------------------------")
 
-    args = Args().get_parser()
+    # args = Args().get_parser()
+    args = Config()
 
     assert args.mode in ["train", "stack"], "mode mismatch"
     assert args.task_type in ["crf", "span", "mrc"]
@@ -265,3 +266,5 @@ if __name__ == "__main__":
 
     time_dif = get_time_dif(start_time)
     logging.info("----------本次容器运行时长：{}-----------".format(time_dif))
+    args.training_time = time_dif
+    args.save_config()
