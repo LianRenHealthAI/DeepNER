@@ -1,0 +1,3 @@
+[submodule "UER-py"]
+	path = UER-py
+	url = git@github.com:LianRenHealthAI/UER-py.git
