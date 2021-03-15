@@ -2,7 +2,14 @@
 import os
 from transformers import AutoTokenizer
 import json
-from src.utils.model_utils import CRFModel
+
+from transformers.tokenization_bert import BertTokenizer
+from src.utils.model_utils import (
+    CRFModel,
+    SpanModel,
+    EnsembleCRFModel,
+    EnsembleSpanModel,
+)
 from src.utils.functions_utils import load_model_and_parallel
 from collections import defaultdict
 import torch
@@ -10,12 +17,13 @@ from src.utils.evaluator import crf_decode, span_decode
 import zipfile
 
 SUBMIT_DIR = "./results"
-VERSION = "mixed"  # choose single or ensemble or mixed ; if mixed  VOTE and TAST_TYPE is useless.
+VERSION = "single"  # choose single or ensemble or mixed ; if mixed  VOTE and TAST_TYPE is useless.
 MID_DATA_DIR = "/home/xiaojin/Code/DeepNER/data/crf_data/mid_data"
 TEST_DATA = "/home/xiaojin/Code/DeepNER/data/crf_data/test_data/test.json"
 
-BERT_DIR = "pretrained/chinese-roberta-wwm-ext"
-BERT_DIR = "pretrained/bert-base-chinese"
+# BERT_DIR = "pretrained/chinese-roberta-wwm-ext"
+# BERT_DIR = "pretrained/bert-base-chinese"
+BERT_DIR = "pretrained/torch_uer_large"
 
 TASK_TYPE = "crf"
 GPU_IDS = "0"
@@ -25,8 +33,13 @@ VOTE = False
 LAMBDA = 0.3
 THRESHOLD = 0.9
 
+BERT_DIR_LIST = ["pretrained/bert-base-chinese"]
 with open("./best_ckpt_path.txt", "r", encoding="utf-8") as f:
-    CKPT_PATH = f.read().strip()
+    CKPT_PATH = f.readlines()[-1].strip()
+
+with open("./best_ckpt_path.txt", "r", encoding="utf-8") as f:
+    ENSEMBLE_DIR_LIST = f.readlines()
+    print("ENSEMBLE_DIR_LIST:{}".format(ENSEMBLE_DIR_LIST))
 
 
 def prepare_info():
@@ -39,7 +52,8 @@ def prepare_info():
 
     info_dict["id2ent"] = {ent2id[key]: key for key in ent2id.keys()}
 
-    info_dict["tokenizer"] = AutoTokenizer.from_pretrained(BERT_DIR)
+    # info_dict["tokenizer"] = AutoTokenizer.from_pretrained(BERT_DIR)
+    info_dict["tokenizer"] = BertTokenizer(os.path.join(BERT_DIR, "vocab.txt"))
 
     return info_dict
 
@@ -215,6 +229,40 @@ def single_predict():
     return labels
 
 
+def ensemble_predict():
+    save_dir = os.path.join(SUBMIT_DIR, VERSION)
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir, exist_ok=True)
+
+    info_dict = prepare_info()
+
+    model_path_list = [x.strip() for x in ENSEMBLE_DIR_LIST]
+    print("model_path_list:{}".format(model_path_list))
+    print('info_dict["id2ent"]')
+
+    device = torch.device(f"cuda:{GPU_IDS[0]}")
+
+    if TASK_TYPE == "crf":
+        model = EnsembleCRFModel(
+            model_path_list=model_path_list,
+            bert_dir_list=BERT_DIR_LIST,
+            num_tags=len(info_dict["id2ent"]),
+            device=device,
+            lamb=LAMBDA,
+        )
+    else:
+        model = EnsembleSpanModel(
+            model_path_list=model_path_list,
+            bert_dir_list=BERT_DIR_LIST,
+            num_tags=len(info_dict["id2ent"]) + 1,
+            device=device,
+        )
+
+    labels = base_predict(model, device, info_dict, ensemble=True)
+
+    return labels
+
+
 #%%
 
 
@@ -244,5 +292,7 @@ def write_to_submit(labels):
 
 if __name__ == "__main__":
     labels = single_predict()
+    # labels = ensemble_predict()
     write_to_submit(labels)
-    zip_file(SUBMIT_DIR)
+    print("文件写入成功")
+    # zip_file(SUBMIT_DIR)

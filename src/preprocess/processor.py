@@ -661,8 +661,8 @@ def convert_mrc_example(
 def convert_examples_to_features(task_type, examples, max_seq_len, bert_dir, ent2id):
     assert task_type in ["crf", "span", "mrc"]
 
-    # tokenizer = BertTokenizer(os.path.join(bert_dir, "vocab.txt"))
-    tokenizer = AutoTokenizer.from_pretrained(bert_dir)
+    tokenizer = BertTokenizer(os.path.join(bert_dir, "vocab.txt"))
+    # tokenizer = AutoTokenizer.from_pretrained(bert_dir)
 
     features = []
 
