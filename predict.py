@@ -1,28 +1,37 @@
 #%%
 import os
-from transformers import AutoTokenizer
+from transformers import BertTokenizer
 import json
+from submit_fix import fix_blank_index, zip_file
 
-from transformers.tokenization_bert import BertTokenizer
+# from transformers.tokenization_bert import BertTokenizer
+
 from src.utils.model_utils import (
     CRFModel,
     SpanModel,
     EnsembleCRFModel,
     EnsembleSpanModel,
 )
+
 from src.utils.functions_utils import load_model_and_parallel
 from collections import defaultdict
 import torch
 from src.utils.evaluator import crf_decode, span_decode
 import zipfile
+from config import Config
 
-SUBMIT_DIR = "./results"
-VERSION = "single"  # choose single or ensemble or mixed ; if mixed  VOTE and TAST_TYPE is useless.
-MID_DATA_DIR = "/home/xiaojin/Code/DeepNER/data/crf_data/mid_data"
+args = Config()
+args.load_config_from_json(last=True)
+
+SUBMIT_DIR = args.submit_dir
+VERSION = (
+    args.version
+)  # choose single or ensemble or mixed ; if mixed  VOTE and TAST_TYPE is useless.
+MID_DATA_DIR = args.mid_data_dir
 TEST_DATA = "/home/xiaojin/Code/DeepNER/data/crf_data/test_data/test.json"
 
 # BERT_DIR = "pretrained/chinese-roberta-wwm-ext"
-BERT_DIR = "pretrained/bert-base-chinese"
+BERT_DIR = args.bert_dir
 # BERT_DIR = "pretrained/torch_uer_large"
 
 TASK_TYPE = "crf"
@@ -269,13 +278,15 @@ def ensemble_predict():
 
 
 def zip_file(src_dir):
-    zip_name = src_dir + ".zip"
+    zip_name = "results.zip"
     z = zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED)
     for dirpath, dirnames, filenames in os.walk(src_dir):
-        fpath = dirpath.replace(src_dir, "")
-        fpath = fpath and fpath + os.sep or ""
-        for filename in filenames:
-            z.write(os.path.join(dirpath, filename), fpath + filename)
+        # print(dirpath, dirnames, filenames)
+        if dirpath == "submit/results":
+            fpath = dirpath.replace(src_dir, "")
+            fpath = fpath and fpath + os.sep or ""
+            for filename in filenames:
+                z.write(os.path.join(dirpath, filename), fpath + filename)
     print("==压缩成功==")
     z.close()
 
@@ -294,7 +305,9 @@ def write_to_submit(labels):
 
 if __name__ == "__main__":
     labels = single_predict()
-    # labels = ensemble_predict()
+    # # labels = ensemble_predict()
     write_to_submit(labels)
-    print("文件写入成功")
-    # zip_file(SUBMIT_DIR)
+    # print("文件写入成功")
+
+    fix_blank_index("data/crf_data/test_data", os.path.join(SUBMIT_DIR, VERSION))
+    zip_file("submit")

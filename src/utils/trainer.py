@@ -243,7 +243,7 @@ def train(opt, model, train_dataset):
                 save_model(opt, model, global_step)
 
     # todo 这是什么鬼
-    # swa(swa_raw_model, opt.output_dir, swa_start=opt.swa_start)
+    swa(swa_raw_model, opt.output_dir, swa_start=opt.swa_start)
 
     # clear cuda cache to avoid OOM
     torch.cuda.empty_cache()

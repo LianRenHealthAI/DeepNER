@@ -5,6 +5,11 @@ import logging
 from transformers import BertTokenizer, AutoTokenizer
 from collections import defaultdict
 import random
+from config import Config
+
+args = Config()
+args.load_config_from_json(last=True)
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 #%%
 with open(
-    "/home/xiaojin/Code/DeepNER/data/crf_data/mid_data/crf_ent2id.json",
+    os.path.join(args.mid_data_dir, "crf_ent2id.json"),
     encoding="utf-8",
 ) as f:
     ent2id = json.load(f)

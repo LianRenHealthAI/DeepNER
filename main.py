@@ -152,8 +152,12 @@ def training(opt):
     else:
         processor = NERProcessor(opt.max_seq_len)
 
+    # todo ???
     train_raw_examples = processor.read_json(
         os.path.join(opt.raw_data_dir, "stack.json")
+    )
+    train_raw_examples = processor.read_json(
+        os.path.join(opt.raw_data_dir, "train.json")
     )
 
     # add pseudo data to train data
@@ -224,6 +228,7 @@ if __name__ == "__main__":
 
     # args = Args().get_parser()
     args = Config()
+    args.load_config_from_json()
 
     assert args.mode in ["train", "stack"], "mode mismatch"
     assert args.task_type in ["crf", "span", "mrc"]

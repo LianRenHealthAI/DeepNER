@@ -12,7 +12,7 @@ class Config:
         self.mode = "train"
         self.task_type = "crf"
         self.bert_dir = "pretrained/bert-base-chinese"
-        self.bert_type = "bert-base"
+        self.bert_type = "bert_base"
         self.train_epochs = 10
         self.swa_start = 5
         self.attack_train = ""
@@ -31,14 +31,23 @@ class Config:
         self.max_grad_norm = 1.0
         self.warmup_proportion = 0.1
         self.adam_epsilon = 1e-8
-        self.version = "v0"
+        self.version = "single"
         self.submit_dir = "submit"
         self.ckpt_dir = ""
         self.training_time = ""
 
-    def load_config_from_json(self, path="training_params.json"):
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+    def load_config_from_json(self, path="training_params.json", last=False):
+        if not last:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        else:
+            history_dir = "params_history"
+            file_names = os.listdir(history_dir)
+            file_names = sorted(file_names, reverse=True)
+            with open(
+                os.path.join(history_dir, file_names[0]), "r", encoding="utf-8"
+            ) as f:
+                data = json.load(f)
         for k, v in data.items():
             setattr(self, k, v)
 
@@ -52,7 +61,7 @@ class Config:
 
         with open(file_path, "w") as f:
             print(self.__dict__)
-            json.dump(self.__dict__, f, ensure_ascii=False, indent=2)
+            json.dump(self.__dict__, f, ensure_ascii=False, indent=2, default=str)
 
 
 if __name__ == "__main__":
