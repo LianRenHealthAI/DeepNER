@@ -150,6 +150,14 @@ class BaseModel(nn.Module):
 
         self.bert_config = self.bert_module.config
 
+        self.bilstm = nn.LSTM(
+            bidirectional=True,
+            num_layers=2,
+            input_size=self.bert_config.hidden_size,
+            hidden_size=768 // 2,
+            batch_first=True,
+        )
+
     @staticmethod
     def _init_weights(blocks, **kwargs):
         """
@@ -209,6 +217,9 @@ class CRFModel(BaseModel):
 
         # 常规
         seq_out = bert_outputs[0]
+
+        # 加个lstm
+        # seq_out = self.bilstm(seq_out)[0]
 
         seq_out = self.mid_linear(seq_out)
 

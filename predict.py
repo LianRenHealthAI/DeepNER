@@ -28,7 +28,7 @@ VERSION = (
     args.version
 )  # choose single or ensemble or mixed ; if mixed  VOTE and TAST_TYPE is useless.
 MID_DATA_DIR = args.mid_data_dir
-TEST_DATA = "/home/xiaojin/Code/DeepNER/data/crf_data/test_data/test.json"
+TEST_DATA = "data/crf_data/test_data/test.json"
 
 # BERT_DIR = "pretrained/chinese-roberta-wwm-ext"
 BERT_DIR = args.bert_dir

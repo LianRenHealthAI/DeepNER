@@ -1,6 +1,6 @@
 {
-  "gpu_ids": "0,1,2,3",
-  "output_dir": "out/bert-base_wd_crf",
+  "gpu_ids": "0,1,2",
+  "output_dir": "out/bert-base_wd_crf/bert-base_wd_crf",
   "mid_data_dir": "data/crf_data/mid_data",
   "raw_data_dir": "data/crf_data",
   "mode": "train",
@@ -8,11 +8,11 @@
   "bert_dir": "pretrained/bert-base-chinese",
   "bert_type": "bert-base",
   "train_epochs": 20,
-  "swa_start": 15,
+  "swa_start": 6,
   "attack_train": "",
   "train_batch_size": 128,
   "eval_batch_size": 128,
-  "dropout_prob": 0.05,
+  "dropout_prob": 0.2,
   "max_seq_len": 150,
   "lr": 2e-05,
   "other_lr": 0.002,
@@ -28,5 +28,5 @@
   "version": "single",
   "submit_dir": "submit",
   "ckpt_dir": "",
-  "training_time": "0:00:00"
+  "training_time": "0:39:41"
 }

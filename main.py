@@ -96,7 +96,7 @@ def train_base(opt, train_examples, dev_examples=None):
             tmp_step = model_path.split("/")[-2].split("-")[-1]
 
             model, device = load_model_and_parallel(
-                model, opt.gpu_ids[0], ckpt_path=model_path
+                model, opt.gpu_ids[0], ckpt_path=model_path, strict=False
             )
 
             if opt.task_type == "crf":

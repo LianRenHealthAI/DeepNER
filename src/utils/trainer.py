@@ -103,7 +103,7 @@ def train(opt, model, train_dataset):
     if opt.use_fp16:
         scaler = torch.cuda.amp.GradScaler()
 
-    model, device = load_model_and_parallel(model, opt.gpu_ids)
+    model, device = load_model_and_parallel(model, opt.gpu_ids, strict=False)
 
     use_n_gpus = False
     if hasattr(model, "module"):
@@ -243,7 +243,7 @@ def train(opt, model, train_dataset):
                 save_model(opt, model, global_step)
 
     # todo 这是什么鬼
-    swa(swa_raw_model, opt.output_dir, swa_start=opt.swa_start)
+    # swa(swa_raw_model, opt.output_dir, swa_start=opt.swa_start)
 
     # clear cuda cache to avoid OOM
     torch.cuda.empty_cache()
