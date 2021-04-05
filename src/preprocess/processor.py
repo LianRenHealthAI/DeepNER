@@ -8,7 +8,7 @@ import random
 from config import Config
 
 args = Config()
-args.load_config_from_json(last=True)
+args.load_config_from_yaml(last=True)
 
 
 logger = logging.getLogger(__name__)
@@ -391,7 +391,8 @@ def convert_crf_example(
     encode_dict = tokenizer.encode_plus(
         text=tokens,
         max_length=max_seq_len,
-        pad_to_max_length=True,
+        # pad_to_max_length=True,
+        padding="max_length",
         is_pretokenized=True,
         return_token_type_ids=True,
         return_attention_mask=True,
@@ -477,7 +478,8 @@ def convert_span_example(
     encode_dict = tokenizer.encode_plus(
         text=tokens,
         max_length=max_seq_len,
-        pad_to_max_length=True,
+        # pad_to_max_length=True,
+        padding="max_length",
         is_pretokenized=True,
         return_token_type_ids=True,
         return_attention_mask=True,
@@ -583,7 +585,8 @@ def convert_mrc_example(
                 text=tokens_a,
                 text_pair=tokens_b,
                 max_length=max_seq_len,
-                pad_to_max_length=True,
+                # pad_to_max_length=True,
+                padding="max_length",
                 truncation_strategy="only_second",
                 is_pretokenized=True,
                 return_token_type_ids=True,
@@ -626,7 +629,8 @@ def convert_mrc_example(
                 text=tokens_a,
                 text_pair=tokens_b,
                 max_length=max_seq_len,
-                pad_to_max_length=True,
+                # pad_to_max_length=True,
+                padding="max_length",
                 truncation_strategy="only_second",
                 is_pretokenized=True,
                 return_token_type_ids=True,

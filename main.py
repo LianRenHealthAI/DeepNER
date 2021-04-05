@@ -153,9 +153,9 @@ def training(opt):
         processor = NERProcessor(opt.max_seq_len)
 
     # todo ???
-    train_raw_examples = processor.read_json(
-        os.path.join(opt.raw_data_dir, "stack.json")
-    )
+    # train_raw_examples = processor.read_json(
+    #     os.path.join(opt.raw_data_dir, "stack.json")
+    # )
     train_raw_examples = processor.read_json(
         os.path.join(opt.raw_data_dir, "train.json")
     )
@@ -228,7 +228,7 @@ if __name__ == "__main__":
 
     # args = Args().get_parser()
     args = Config()
-    args.load_config_from_json()
+    args.load_config_from_yaml()
 
     assert args.mode in ["train", "stack"], "mode mismatch"
     assert args.task_type in ["crf", "span", "mrc"]
@@ -271,5 +271,5 @@ if __name__ == "__main__":
 
     time_dif = get_time_dif(start_time)
     logging.info("----------本次容器运行时长：{}-----------".format(time_dif))
-    args.training_time = time_dif
-    args.save_config()
+    args.training_time = str(time_dif)
+    args.save_yaml()

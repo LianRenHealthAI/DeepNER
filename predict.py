@@ -21,7 +21,7 @@ import zipfile
 from config import Config
 
 args = Config()
-args.load_config_from_json(last=True)
+args.load_config_from_yaml(last=True)
 
 SUBMIT_DIR = args.submit_dir
 VERSION = (
@@ -78,8 +78,9 @@ def fine_grade_tokenize(raw_text, tokenizer):
 
     for _ch in raw_text:
         if _ch in [" ", "\t", "\n"]:
-            # tokens.append("[BLANK]")
-            tokens.append("[BLANK]")
+            # todo 确定token作用
+            # tokens.append("[BLANK]")  # to do
+            tokens.append(_ch)
             # tokens.append("的")
         else:
             if not len(tokenizer.tokenize(_ch)):
@@ -119,7 +120,8 @@ def base_predict(model, device, info_dict, ensemble=False, mixed=""):
                     text=sent_tokens,
                     max_length=MAX_SEQ_LEN,
                     is_pretokenized=True,
-                    pad_to_max_length=False,
+                    # pad_to_max_length=True,
+                    padding="max_length",  # todo 这啥为啥是false
                     return_tensors="pt",
                     return_token_type_ids=True,
                     return_attention_mask=True,

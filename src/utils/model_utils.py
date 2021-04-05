@@ -7,6 +7,9 @@ from itertools import repeat
 from transformers import BertModel
 from src.utils.functions_utils import vote
 from src.utils.evaluator import crf_decode, span_decode
+from src.utils.f1_argmax import OptimizedF1
+
+op = OptimizedF1()
 
 
 class LabelSmoothingCrossEntropy(nn.Module):
@@ -269,14 +272,21 @@ class CRFModel(BaseModel):
             tokens_out = self.crf_module.decode(
                 emissions=emissions, mask=attention_masks.byte()
             )
-
             out = (tokens_out, emissions)
 
         return out
 
 
 class SpanModel(BaseModel):
-    def __init__(self, bert_dir, num_tags, dropout_prob=0.1, loss_type="ce", **kwargs):
+    def __init__(
+        self,
+        bert_dir,
+        num_tags,
+        dropout_prob=0.1,
+        loss_type="ce",
+        max_seq_len=128,
+        **kwargs,
+    ):
         """
         tag the subject and object corresponding to the predicate
         :param loss_type: train loss type in ['ce', 'ls_ce', 'focal']
@@ -288,6 +298,8 @@ class SpanModel(BaseModel):
         mid_linear_dims = kwargs.pop("mid_linear_dims", 128)
 
         self.num_tags = num_tags
+
+        self.max_seq_len = max_seq_len
 
         self.mid_linear = nn.Sequential(
             nn.Linear(out_dims, mid_linear_dims), nn.ReLU(), nn.Dropout(dropout_prob)
@@ -358,12 +370,12 @@ class SpanModel(BaseModel):
                 # (batch,)
                 start_loss = (
                     self.criterion(start_logits, start_ids.view(-1))
-                    .view(-1, 512)
+                    .view(-1, self.max_seq_len)
                     .mean(dim=-1)
                 )
                 end_loss = (
                     self.criterion(end_logits, end_ids.view(-1))
-                    .view(-1, 512)
+                    .view(-1, self.max_seq_len)
                     .mean(dim=-1)
                 )
 
@@ -404,7 +416,13 @@ class SpanModel(BaseModel):
 
 class MRCModel(BaseModel):
     def __init__(
-        self, bert_dir, dropout_prob=0.1, use_type_embed=False, loss_type="ce", **kwargs
+        self,
+        bert_dir,
+        dropout_prob=0.1,
+        use_type_embed=False,
+        loss_type="ce",
+        max_seq_len=128,
+        **kwargs,
     ):
         """
         tag the subject and object corresponding to the predicate
@@ -429,6 +447,8 @@ class MRCModel(BaseModel):
             )
 
         mid_linear_dims = kwargs.pop("mid_linear_dims", 128)
+
+        self.max_seq_len = max_seq_len
 
         self.mid_linear = nn.Sequential(
             nn.Linear(out_dims, mid_linear_dims), nn.ReLU(), nn.Dropout(dropout_prob)
@@ -510,12 +530,12 @@ class MRCModel(BaseModel):
                 # (batch,)
                 start_loss = (
                     self.criterion(start_logits, start_ids.view(-1))
-                    .view(-1, 512)
+                    .view(-1, self.max_seq_len)
                     .mean(dim=-1)
                 )
                 end_loss = (
                     self.criterion(end_logits, end_ids.view(-1))
-                    .view(-1, 512)
+                    .view(-1, self.max_seq_len)
                     .mean(dim=-1)
                 )
 
@@ -546,6 +566,9 @@ class MRCModel(BaseModel):
             else:
                 start_loss = self.criterion(active_start_logits, active_start_labels)
                 end_loss = self.criterion(active_end_logits, active_end_labels)
+
+            # start_loss = self.criterion(active_start_logits, active_start_labels)
+            # end_loss = self.criterion(active_end_logits, active_end_labels)
 
             loss = start_loss + end_loss
 

@@ -6,5 +6,4 @@ pretrained/
 out/
 results.zip
 best_ckpt_path.txt
-submit/*
-submit/single/
+*.tag

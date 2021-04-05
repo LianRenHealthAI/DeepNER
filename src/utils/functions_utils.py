@@ -34,7 +34,7 @@ def set_seed(seed):
     torch.cuda.manual_seed_all(seed)
 
 
-def load_model_and_parallel(model, gpu_ids, ckpt_path=None, strict=True):
+def load_model_and_parallel(model, gpu_ids, ckpt_path=None, strict=False):
     """
     加载模型 & 放置到 GPU 中（单卡 / 多卡）
     """

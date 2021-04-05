@@ -1,6 +1,7 @@
 import json
 import os
 import time
+import yaml
 
 
 class Config:
@@ -51,6 +52,21 @@ class Config:
         for k, v in data.items():
             setattr(self, k, v)
 
+    def load_config_from_yaml(self, path="training_params.yaml", last=False):
+        if not last:
+            with open(path, "r", encoding="utf-8") as f:
+                data = yaml.load(f, Loader=yaml.FullLoader)
+        else:
+            history_dir = "params_history"
+            file_names = os.listdir(history_dir)
+            file_names = sorted(file_names, reverse=True)
+            with open(
+                os.path.join(history_dir, file_names[0]), "r", encoding="utf-8"
+            ) as f:
+                data = yaml.load(f, Loader=yaml.FullLoader)
+        for k, v in data.items():
+            setattr(self, k, v)
+
     # @classmethod
     def save_config(self, folder="params_history"):
         if not os.path.exists(folder):
@@ -63,7 +79,18 @@ class Config:
             print(self.__dict__)
             json.dump(self.__dict__, f, ensure_ascii=False, indent=2, default=str)
 
+    def save_yaml(self, folder="params_history"):
+        if not os.path.exists(folder):
+            os.makedirs(folder, exist_ok=True)
+        file_path = os.path.join(
+            folder, time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime()) + ".yaml"
+        )
+
+        with open(file_path, "w") as f:
+            print(self.__dict__)
+            yaml.dump(self.__dict__, f, sort_keys=False)
+
 
 if __name__ == "__main__":
     config = Config()
-    config.save_config()
+    config.save_yaml()
