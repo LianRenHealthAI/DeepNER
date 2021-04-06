@@ -261,7 +261,7 @@ def cut_sent(text, max_seq_len):
         else:
             sentences.append(sent_v1)
 
-    assert "".join(sentences) == text
+    # assert "".join(sentences) == text
 
     # 合并
     merged_sentences = []
