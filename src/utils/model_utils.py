@@ -1,5 +1,6 @@
 import os
 import math
+from os import path
 import torch
 import torch.nn as nn
 from torchcrf import CRF
@@ -589,7 +590,7 @@ class EnsembleCRFModel:
 
             print(f"Load model type: {bert_dir_list[0]}")
             model = CRFModel(bert_dir=bert_dir_list[0], num_tags=num_tags)
-
+            print("model path ", _path)
             model.load_state_dict(torch.load(_path, map_location=torch.device("cpu")))
 
             model.eval()

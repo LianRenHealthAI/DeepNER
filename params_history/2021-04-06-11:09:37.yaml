@@ -1,5 +1,5 @@
 gpu_ids: '0'
-output_dir: out
+output_dir: out/bert_base_wd_crf
 mid_data_dir: data/crf_data/mid_data
 raw_data_dir: data/crf_data
 mode: train
@@ -7,12 +7,12 @@ task_type: crf
 bert_dir: pretrained/bert-base-chinese
 bert_type: bert_base
 vote: false
-train_epochs: 2
-swa_start: 1
+train_epochs: 10
+swa_start: 5
 attack_train: ''
 train_batch_size: 32
 eval_batch_size: 32
-dropout_prob: 0
+dropout_prob: 0.1
 max_seq_len: 200
 lr: 2.0e-05
 other_lr: 0.002
@@ -28,4 +28,4 @@ adam_epsilon: 1.0e-08
 version: single
 submit_dir: submit
 ckpt_dir: ''
-training_time: ''
+training_time: 0:33:53

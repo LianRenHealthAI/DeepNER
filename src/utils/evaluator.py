@@ -150,6 +150,7 @@ def get_p_r_f(tp, fp, fn):
 
 
 def crf_evaluation(model, dev_info, device, ent2id):
+    # ! todo
     dev_loader, (dev_callback_info, type_weight) = dev_info
 
     pred_tokens = []

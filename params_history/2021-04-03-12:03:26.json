@@ -28,5 +28,6 @@
   "version": "single",
   "submit_dir": "submit",
   "ckpt_dir": "",
-  "training_time": "0:43:58"
+  "training_time": "0:43:58",
+  "score": "0.929"
 }

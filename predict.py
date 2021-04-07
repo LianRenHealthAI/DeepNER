@@ -34,10 +34,12 @@ TEST_DATA = "data/crf_data/test_data/test.json"
 BERT_DIR = args.bert_dir
 # BERT_DIR = "pretrained/torch_uer_large"
 
-TASK_TYPE = "crf"
-GPU_IDS = "0"
-MAX_SEQ_LEN = 128
-VOTE = False
+# TASK_TYPE = "crf"
+# GPU_IDS = "0"
+# MAX_SEQ_LEN = 128
+
+args.gpu_ids = "0"
+VOTE = args.vote
 
 LAMBDA = 0.3
 THRESHOLD = 0.9
@@ -50,7 +52,7 @@ with open("./best_ckpt_path.txt", "r", encoding="utf-8") as f:
 
 with open("./best_ckpt_path.txt", "r", encoding="utf-8") as f:
     ENSEMBLE_DIR_LIST = f.readlines()
-    print("ENSEMBLE_DIR_LIST:{}".format(ENSEMBLE_DIR_LIST))
+    # print("ENSEMBLE_DIR_LIST:{}".format(ENSEMBLE_DIR_LIST))
 
 
 def prepare_info():
@@ -118,7 +120,7 @@ def base_predict(model, device, info_dict, ensemble=False, mixed=""):
 
                 encode_dict = tokenizer.encode_plus(
                     text=sent_tokens,
-                    max_length=MAX_SEQ_LEN,
+                    max_length=args.max_seq_len,
                     is_pretokenized=True,
                     # pad_to_max_length=True,
                     padding="max_length",  # todo 这啥为啥是false
@@ -137,7 +139,7 @@ def base_predict(model, device, info_dict, ensemble=False, mixed=""):
                     model_inputs[key] = model_inputs[key].to(device)
 
                 if ensemble:
-                    if TASK_TYPE == "crf":
+                    if args.task_type == "crf":
                         if VOTE:
                             decode_entities = model.vote_entities(
                                 model_inputs, sent, id2ent, THRESHOLD
@@ -180,7 +182,7 @@ def base_predict(model, device, info_dict, ensemble=False, mixed=""):
                             )
 
                     else:
-                        if TASK_TYPE == "crf":
+                        if args.task_type == "crf":
                             pred_tokens = model(**model_inputs)[0][0]
                             decode_entities = crf_decode(pred_tokens, sent, id2ent)
                         else:
@@ -235,7 +237,8 @@ def single_predict():
     model = CRFModel(bert_dir=BERT_DIR, num_tags=len(info_dict["id2ent"]))
 
     print(f"Load model from {CKPT_PATH}")
-    model, device = load_model_and_parallel(model, GPU_IDS, CKPT_PATH)
+    model, device = load_model_and_parallel(model, args.gpu_ids, CKPT_PATH)
+    # print(model)
     model.eval()
 
     labels = base_predict(model, device, info_dict)
@@ -253,9 +256,9 @@ def ensemble_predict():
     print("model_path_list:{}".format(model_path_list))
     print('info_dict["id2ent"]')
 
-    device = torch.device(f"cuda:{GPU_IDS[0]}")
+    device = torch.device(f"cuda:{args.gpu_ids[0]}")
 
-    if TASK_TYPE == "crf":
+    if args.task_type == "crf":
         model = EnsembleCRFModel(
             model_path_list=model_path_list,
             bert_dir_list=BERT_DIR_LIST,
@@ -277,8 +280,6 @@ def ensemble_predict():
 
 
 #%%
-
-
 def zip_file(src_dir):
     zip_name = "results.zip"
     z = zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED)
@@ -302,14 +303,31 @@ def write_to_submit(labels):
                 f.write("")
             else:
                 for idx, _label in enumerate(labels[key]):
-                    f.write(f"{_label[1]}#{_label[2]}#{_label[0]}#{_label[3]}\n")
+                    if idx == len(labels[key]):
+                        f.write(f"{_label[1]}#{_label[2]}#{_label[0]}#{_label[3]}")
+                    else:
+                        f.write(f"{_label[1]}#{_label[2]}#{_label[0]}#{_label[3]}\n")
 
 
 if __name__ == "__main__":
-    labels = single_predict()
-    # # labels = ensemble_predict()
+
+    args = Config()
+    args.load_config_from_yaml(last=True)
+    args.gpu_ids = "0"
+    args.version = "single"
+    # args.version = "ensemble"
+    if args.version == "single":
+        print("========single predict=========")
+        labels = single_predict()
+    else:
+        print("========ensemble predict=========")
+        labels = ensemble_predict()
     write_to_submit(labels)
     # print("文件写入成功")
 
-    fix_blank_index("data/crf_data/test_data", os.path.join(SUBMIT_DIR, VERSION))
+    fix_blank_index(
+        "data/crf_data/test_data",
+        os.path.join(SUBMIT_DIR, VERSION),
+        version=args.version,
+    )
     zip_file("submit")

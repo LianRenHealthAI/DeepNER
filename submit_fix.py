@@ -3,7 +3,7 @@ import os
 import zipfile
 
 
-def fix_blank_index(raw_txt_dir, tag_dir):
+def fix_blank_index(raw_txt_dir, tag_dir, version):
     raw_files = [f for f in os.listdir(raw_txt_dir) if f.endswith("txt")]
 
     # print(raw_files)
@@ -30,6 +30,7 @@ def fix_blank_index(raw_txt_dir, tag_dir):
 
                 for line in ft:
                     label_info = line.split("#")
+                    print("label_info:", label_info)
                     start_idx, end_idx = int(label_info[0]), int(label_info[1])
                     # 看前面有多少空字符了，直接加
 
@@ -38,10 +39,21 @@ def fix_blank_index(raw_txt_dir, tag_dir):
                     label_info[1] = int(label_info[1]) + pre_blank_num
                     fix_results.append(label_info)
             with open(
-                os.path.join("submit/results", file_name.replace("txt", "tag")), "w"
+                os.path.join("submit", version, file_name.replace("txt", "tag")), "w"
             ) as fr:
                 for i in fix_results:
-                    fr.write("#".join([str(j) for j in i]))
+                    # 这里，解决嵌套
+                    label = i[2]
+                    if label == "MVI_Sate":
+                        label_row_1 = [str(j) for j in i]
+                        label_row_1[2] = "MVI"
+                        fr.write("#".join(label_row_1))
+
+                        label_row_2 = label_row_1.copy()
+                        label_row_2[2] = "Sate"
+                        fr.write("#".join(label_row_2))
+                    else:
+                        fr.write("#".join([str(j) for j in i]))
 
 
 def zip_file(src_dir):

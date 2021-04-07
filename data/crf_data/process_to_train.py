@@ -87,7 +87,7 @@ def convert_data_to_json(base_dir, save_data=False, save_dict=False):
         ent_types = ["O"] + [
             p + "-" + _type for p in ["B", "I", "E", "S"] for _type in list(ent_types)
         ]
-        print("maybe here is a bug", ent_types)
+        # print("maybe here is a bug", ent_types)
         crf_ent2id = {ent: i for i, ent in enumerate(ent_types)}
 
         mid_data_dir = os.path.join(base_dir, "mid_data")

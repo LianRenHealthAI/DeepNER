@@ -1,14 +1,14 @@
 #%%
 import jsonlines
 import json
-import pandas as pd
-from sklearn.model_selection import train_test_split
 
 #%%
-# doccano_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/ann-0405.jsonl"
+# doccano_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/ann-0407.json1"
 # doccano_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/file.json1"
-doccano_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/train-ann-0325.json1"
-official_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/file_official.json1"
+doccano_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/train-ann-0325.jsonl"
+enhance_data = "data/crf_data/2查见0406.jsonl"
+# test_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/test-re927.json1"
+# official_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/file_official.json1"
 write_path = "/home/xiaojin/Code/DeepNER/data/crf_data/"
 
 #%%
@@ -81,7 +81,7 @@ def convert_to_df(doccano_file_path, official=False, refine_file=False):
 
     for data in labeled_data:
         # if data[0] == "\n":
-        if data[0] == "。":
+        if data[0] == "\n":
             if labeled_data_seq:
                 labeled_data_list.append(labeled_data_seq)
             labeled_data_seq = []
@@ -143,9 +143,10 @@ def convert_to_format(labeled_data):
 
 #%%
 data_mid_1 = convert_to_df(doccano_file_path)
+data_mid_enhance = convert_to_df(enhance_data)
 # data_mid_1 = convert_to_df(doccano_file_path)
-data_mid_2 = convert_to_df(official_file_path, official=True)
-data_mid = data_mid_1 + data_mid_2
+# data_mid_2 = convert_to_df(official_file_path, official=True)
+
 
 data_mid = data_mid_1
 print(data_mid[0])
@@ -156,7 +157,8 @@ for s in data_mid:
         labels.append(label)
 labels = list(set(labels))
 labels_dict = {l: i for i, l in enumerate(labels)}
-with open(write_path + "crf_ent2id.json", "w+") as f:
+
+with open(write_path + "/mid_data/" + "crf_ent2id.json", "w+") as f:
     json.dump(labels_dict, f, ensure_ascii=False, indent=2)
 
 

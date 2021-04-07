@@ -14,6 +14,7 @@ class Config:
         self.task_type = "crf"
         self.bert_dir = "pretrained/bert-base-chinese"
         self.bert_type = "bert_base"
+        self.vote = False
         self.train_epochs = 10
         self.swa_start = 5
         self.attack_train = ""
