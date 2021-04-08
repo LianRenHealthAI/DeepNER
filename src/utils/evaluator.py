@@ -162,7 +162,7 @@ def crf_evaluation(model, dev_info, device, ent2id):
 
     id2ent = {ent2id[key]: key for key in ent2id.keys()}
 
-    role_metric = np.zeros([10, 3])
+    role_metric = np.zeros([11, 3])
 
     mirco_metrics = np.zeros(3)
 
@@ -170,7 +170,7 @@ def crf_evaluation(model, dev_info, device, ent2id):
 
         text, gt_entities = tmp_callback
 
-        tmp_metric = np.zeros([10, 3])
+        tmp_metric = np.zeros([11, 3])
 
         pred_entities = crf_decode(tmp_tokens, text, id2ent)
 

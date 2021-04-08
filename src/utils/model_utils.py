@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 from torchcrf import CRF
 from itertools import repeat
-from transformers import BertModel
+from transformers import BertModel, AutoModelForMaskedLM
 from src.utils.functions_utils import vote
 from src.utils.evaluator import crf_decode, span_decode
 from src.utils.f1_argmax import OptimizedF1
@@ -221,7 +221,7 @@ class CRFModel(BaseModel):
 
         # 常规
         seq_out = bert_outputs[0]
-
+        # print("seq_out shape: ", seq_out.shape)
         # 加个lstm
         # seq_out = self.bilstm(seq_out)[0]
 

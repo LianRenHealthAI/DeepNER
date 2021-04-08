@@ -1,6 +1,6 @@
 #%%
 import os
-from transformers import BertTokenizer
+from transformers import BertTokenizer, AutoTokenizer
 import json
 from submit_fix import fix_blank_index, zip_file
 
@@ -22,6 +22,8 @@ from config import Config
 
 args = Config()
 args.load_config_from_yaml(last=True)
+
+# args.version = "single"
 
 SUBMIT_DIR = args.submit_dir
 VERSION = (
@@ -65,8 +67,8 @@ def prepare_info():
 
     info_dict["id2ent"] = {ent2id[key]: key for key in ent2id.keys()}
 
-    # info_dict["tokenizer"] = AutoTokenizer.from_pretrained(BERT_DIR)
-    info_dict["tokenizer"] = BertTokenizer(os.path.join(BERT_DIR, "vocab.txt"))
+    info_dict["tokenizer"] = BertTokenizer.from_pretrained(BERT_DIR)
+    # info_dict["tokenizer"] = BertTokenizer(os.path.join(BERT_DIR, "vocab.txt"))
 
     return info_dict
 
@@ -121,9 +123,10 @@ def base_predict(model, device, info_dict, ensemble=False, mixed=""):
                 encode_dict = tokenizer.encode_plus(
                     text=sent_tokens,
                     max_length=args.max_seq_len,
-                    is_pretokenized=True,
+                    # is_pretokenized=True,
                     # pad_to_max_length=True,
                     padding="max_length",  # todo 这啥为啥是false
+                    is_split_into_words=True,
                     return_tensors="pt",
                     return_token_type_ids=True,
                     return_attention_mask=True,
@@ -311,10 +314,10 @@ def write_to_submit(labels):
 
 if __name__ == "__main__":
 
-    args = Config()
-    args.load_config_from_yaml(last=True)
-    args.gpu_ids = "0"
-    args.version = "single"
+    # args = Config()
+    # args.load_config_from_yaml(last=True)
+    # args.gpu_ids = "0"
+    # args.version = "single"
     # args.version = "ensemble"
     if args.version == "single":
         print("========single predict=========")
@@ -322,12 +325,13 @@ if __name__ == "__main__":
     else:
         print("========ensemble predict=========")
         labels = ensemble_predict()
+
     write_to_submit(labels)
-    # print("文件写入成功")
+    print("文件写入成功")
 
     fix_blank_index(
         "data/crf_data/test_data",
-        os.path.join(SUBMIT_DIR, VERSION),
+        "submit",
         version=args.version,
     )
     zip_file("submit")

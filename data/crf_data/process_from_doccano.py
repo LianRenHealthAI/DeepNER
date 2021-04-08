@@ -1,11 +1,12 @@
 #%%
 import jsonlines
 import json
+import random
 
 #%%
-# doccano_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/ann-0407.json1"
+doccano_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/ann-0407.json1"
 # doccano_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/file.json1"
-doccano_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/train-ann-0325.jsonl"
+# doccano_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/train-ann-0325.jsonl"
 enhance_data = "data/crf_data/2查见0406.jsonl"
 # test_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/test-re927.json1"
 # official_file_path = "/home/xiaojin/Code/DeepNER/data/crf_data/file_official.json1"
@@ -99,6 +100,7 @@ def convert_to_format(labeled_data):
     saved_data_list = []
     for n, seq in enumerate(labeled_data):
         text = "".join([r[0] for r in seq])
+        # if text not in ["\n", " "]:
         labels = []
         # entity = ""
         # pre_char_slash = False
@@ -148,7 +150,8 @@ data_mid_enhance = convert_to_df(enhance_data)
 # data_mid_2 = convert_to_df(official_file_path, official=True)
 
 
-data_mid = data_mid_1
+data_mid = data_mid_1 + data_mid_enhance
+random.shuffle(data_mid)
 print(data_mid[0])
 
 labels = []

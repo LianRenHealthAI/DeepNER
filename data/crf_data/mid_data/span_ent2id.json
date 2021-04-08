@@ -1,12 +1,13 @@
 {
-  "TNM": 1,
-  "Tdiff": 2,
-  "Tsize": 3,
-  "MVI": 4,
-  "Sate": 5,
-  "Caps": 6,
-  "Tnum": 7,
-  "LC": 8,
-  "This": 9,
-  "Tloc": 10
+  "Caps": 1,
+  "Tsize": 2,
+  "LC": 3,
+  "Tnum": 4,
+  "Tdiff": 5,
+  "Sate": 6,
+  "This": 7,
+  "TNM": 8,
+  "MVI_Sate": 9,
+  "Tloc": 10,
+  "MVI": 11
 }

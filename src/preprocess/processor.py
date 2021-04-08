@@ -325,7 +325,12 @@ def sent_mask(sent, stop_mask_range_list, mask_prob=0.15):
 
 
 def convert_crf_example(
-    ex_idx, example: InputExample, tokenizer: BertTokenizer, max_seq_len, ent2id
+    ex_idx,
+    example: InputExample,
+    tokenizer,
+    max_seq_len,
+    ent2id,
+    bert_type="bert-base",
 ):
     set_type = example.set_type
     raw_text = example.text
@@ -388,12 +393,23 @@ def convert_crf_example(
 
         assert len(label_ids) == max_seq_len, f"{len(label_ids)}"
 
+    # if bert_type == "bert-base":
+    #     encode_dict = tokenizer.encode_plus(
+    #         text=tokens,
+    #         max_length=max_seq_len,
+    #         # pad_to_max_length=True,
+    #         padding="max_length",
+    #         is_pretokenized=True,
+    #         return_token_type_ids=True,
+    #         return_attention_mask=True,
+    #     )
+    # else:
     encode_dict = tokenizer.encode_plus(
         text=tokens,
         max_length=max_seq_len,
         # pad_to_max_length=True,
         padding="max_length",
-        is_pretokenized=True,
+        is_split_into_words=True,
         return_token_type_ids=True,
         return_attention_mask=True,
     )
@@ -474,7 +490,7 @@ def convert_span_example(
 
         assert len(start_ids) == max_seq_len
         assert len(end_ids) == max_seq_len
-
+    # print(tokens)
     encode_dict = tokenizer.encode_plus(
         text=tokens,
         max_length=max_seq_len,
@@ -670,8 +686,8 @@ def convert_mrc_example(
 def convert_examples_to_features(task_type, examples, max_seq_len, bert_dir, ent2id):
     assert task_type in ["crf", "span", "mrc"]
 
-    tokenizer = BertTokenizer(os.path.join(bert_dir, "vocab.txt"))
-    # tokenizer = AutoTokenizer.from_pretrained(bert_dir)
+    # tokenizer = BertTokenizer(os.path.join(bert_dir, "vocab.txt"))
+    tokenizer = BertTokenizer.from_pretrained(bert_dir)
 
     features = []
 

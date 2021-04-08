@@ -1,20 +1,24 @@
-gpu_ids: '0'
+gpu_ids: '0,1,2,3'
 output_dir: out
 mid_data_dir: data/crf_data/mid_data
 raw_data_dir: data/crf_data
-mode: train
+mode: stack
 task_type: crf
 bert_dir: pretrained/bert-base-chinese
-bert_type: bert_base
+bert_type: bert-base
+# bert_dir: pretrained/chinese_roberta_L-12_H-768
+# bert_type: roberta
+
 vote: false
-train_epochs: 2
-swa_start: 1
+train_epochs: 10
+swa_start: 7
 attack_train: ''
-train_batch_size: 32
-eval_batch_size: 32
+train_batch_size: 128
+eval_batch_size: 128
 dropout_prob: 0
 max_seq_len: 200
 lr: 2.0e-05
+# lr: 1.0e-4
 other_lr: 0.002
 seed: 123
 weight_decay: 0.01
