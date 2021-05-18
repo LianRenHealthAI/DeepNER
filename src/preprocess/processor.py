@@ -222,6 +222,8 @@ def fine_grade_tokenize(raw_text, tokenizer):
         else:
             if not len(tokenizer.tokenize(_ch)):
                 tokens.append("[INV]")
+            # elif _ch =='：':
+            #     tokens.append('[COLON]')
             else:
                 tokens.append(_ch)
 
@@ -686,8 +688,8 @@ def convert_mrc_example(
 def convert_examples_to_features(task_type, examples, max_seq_len, bert_dir, ent2id):
     assert task_type in ["crf", "span", "mrc"]
 
-    # tokenizer = BertTokenizer(os.path.join(bert_dir, "vocab.txt"))
-    tokenizer = BertTokenizer.from_pretrained(bert_dir)
+    tokenizer = BertTokenizer(os.path.join(bert_dir, "vocab.txt"))
+    # tokenizer = BertTokenizer.from_pretrained(bert_dir)
 
     features = []
 

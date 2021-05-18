@@ -6,7 +6,8 @@ results = []
 for file in range(0, 21):
     with open(f"data/crf_data/test_data/{file}.txt", "r", encoding="gbk") as f:
         text = f.read()
-    with open(f"submit/results/{file}.tag", "r") as f:
+    # with open(f"submit/results/{file}.tag", "r") as f:
+    with open(f"results-0923/{file}.tag", "r") as f:
         ann = f.read()
 
     pos = list(range(len(text)))

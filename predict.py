@@ -1,8 +1,9 @@
 #%%
 import os
-from transformers import BertTokenizer, AutoTokenizer
+from transformers import BertTokenizer
 import json
 from submit_fix import fix_blank_index, zip_file
+import pickle
 
 # from transformers.tokenization_bert import BertTokenizer
 
@@ -23,7 +24,7 @@ from config import Config
 args = Config()
 args.load_config_from_yaml(last=True)
 
-# args.version = "single"
+args.version = "single"
 
 SUBMIT_DIR = args.submit_dir
 VERSION = (
@@ -34,6 +35,7 @@ TEST_DATA = "data/crf_data/test_data/test.json"
 
 # BERT_DIR = "pretrained/chinese-roberta-wwm-ext"
 BERT_DIR = args.bert_dir
+print("bert dir", BERT_DIR)
 # BERT_DIR = "pretrained/torch_uer_large"
 
 # TASK_TYPE = "crf"
@@ -67,8 +69,8 @@ def prepare_info():
 
     info_dict["id2ent"] = {ent2id[key]: key for key in ent2id.keys()}
 
-    info_dict["tokenizer"] = BertTokenizer.from_pretrained(BERT_DIR)
-    # info_dict["tokenizer"] = BertTokenizer(os.path.join(BERT_DIR, "vocab.txt"))
+    # info_dict["tokenizer"] = BertTokenizer.from_pretrained(BERT_DIR)
+    info_dict["tokenizer"] = BertTokenizer(os.path.join(BERT_DIR, "vocab.txt"))
 
     return info_dict
 
@@ -83,8 +85,8 @@ def fine_grade_tokenize(raw_text, tokenizer):
     for _ch in raw_text:
         if _ch in [" ", "\t", "\n"]:
             # todo 确定token作用
-            # tokens.append("[BLANK]")  # to do
-            tokens.append(_ch)
+            tokens.append("[BLANK]")  # to do
+            # tokens.append(_ch)
             # tokens.append("的")
         else:
             if not len(tokenizer.tokenize(_ch)):
@@ -299,17 +301,19 @@ def zip_file(src_dir):
 
 def write_to_submit(labels):
     save_dir = os.path.join(SUBMIT_DIR, VERSION)
+    print("save_dir: ", save_dir)
     for key in labels.keys():
+        print(labels)
         with open(os.path.join(save_dir, f"{key}.tag"), "w", encoding="utf-8") as f:
             if not len(labels[key]):
                 print(key)
                 f.write("")
             else:
                 for idx, _label in enumerate(labels[key]):
-                    if idx == len(labels[key]):
-                        f.write(f"{_label[1]}#{_label[2]}#{_label[0]}#{_label[3]}")
-                    else:
-                        f.write(f"{_label[1]}#{_label[2]}#{_label[0]}#{_label[3]}\n")
+                    # if idx == len(labels[key]):
+                    #     f.write(f"{_label[1]}#{_label[2]}#{_label[0]}#{_label[3]}")
+                    # else:
+                    f.write(f"{_label[1]}#{_label[2]}#{_label[0]}#{_label[3]}\n")
 
 
 if __name__ == "__main__":
@@ -319,12 +323,19 @@ if __name__ == "__main__":
     # args.gpu_ids = "0"
     # args.version = "single"
     # args.version = "ensemble"
-    if args.version == "single":
-        print("========single predict=========")
-        labels = single_predict()
-    else:
-        print("========ensemble predict=========")
-        labels = ensemble_predict()
+
+    # if args.version == "single":
+    #     print("========single predict=========")
+    #     labels = single_predict()
+    # else:
+    #     print("========ensemble predict=========")
+    #     labels = ensemble_predict()
+
+    # with open("label.pkl", "wb") as f:
+    #     pickle.dump(labels, f)
+
+    with open("label.pkl", "rb") as f:
+        labels = pickle.load(f)
 
     write_to_submit(labels)
     print("文件写入成功")
